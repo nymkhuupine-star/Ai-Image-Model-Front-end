@@ -4,11 +4,13 @@ import { useState } from "react";
 import { Dialog, Transition } from "@headlessui/react";
 import { Fragment } from "react";
 import { TrashIcon } from "@heroicons/react/24/outline";
+import Image from "next/image";
 
 export default function ImageCard(props: { className?: string }) {
   const { className } = props;
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
+  const [description, setDescription] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -17,6 +19,7 @@ export default function ImageCard(props: { className?: string }) {
     const file = e.target.files[0];
     setSelectedImage(file);
     setPreview(URL.createObjectURL(file));
+    setDescription(null);
   };
 
   const handleGenerate = async () => {
@@ -24,21 +27,28 @@ export default function ImageCard(props: { className?: string }) {
     setLoading(true);
 
     try {
+      // 1️⃣ Зураг upload
       const formData = new FormData();
       formData.append("image", selectedImage);
-
-      const res = await fetch("http://localhost:1000/anime", {
+      const uploadRes = await fetch("http://localhost:1000/image", {
         method: "POST",
         body: formData,
       });
+      const uploadData = await uploadRes.json();
+      const filename = uploadData.filename;
 
-      const data = await res.json();
-      // Backend-с буусан anime зурагны path-г preview болгоно
-      setPreview(`http://localhost:1000/${data.path}`);
+      // 2️⃣ Hugging Face-р description авах
+      const descRes = await fetch("http://localhost:1000/describe", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ filename }),
+      });
+      const descData = await descRes.json();
+      setDescription(descData.description);
       setIsModalOpen(true);
     } catch (err) {
       console.error(err);
-      alert("Anime generation failed");
+      alert("Failed to generate description");
     } finally {
       setLoading(false);
     }
@@ -47,21 +57,27 @@ export default function ImageCard(props: { className?: string }) {
   const handleDelete = () => {
     setSelectedImage(null);
     setPreview(null);
+    setDescription(null);
   };
 
   return (
     <>
-      <div className="w-full max-w-4xl mx-auto bg-white/5 backdrop-blur-2xl border border-white/10 rounded-3xl flex flex-col md:flex-row overflow-hidden shadow-xl transition hover:scale-[1.01]">
+      <div
+        className={`w-full max-w-4xl mx-auto border border-white/10 rounded-3xl flex flex-col md:flex-row overflow-hidden shadow-xl transition hover:scale-[1.01] ${
+          className ?? ""
+        }`}
+      >
         <div
-          className="relative md:w-1/2 h-64 md:h-auto bg-white/5 border-b md:border-b-0 md:border-r border-white/10 flex items-center justify-center cursor-pointer"
+          className="relative md:w-1/2 h-64 md:h-auto border-b md:border-b-0 md:border-r border-white/10 flex items-center justify-center cursor-pointer"
           onClick={() => preview && setIsModalOpen(true)}
         >
           {preview ? (
             <>
-              <img
+              <Image
                 src={preview}
                 alt="Preview"
                 className="object-cover w-full h-full transition-transform duration-500 hover:scale-105"
+                fill
               />
               <button
                 onClick={(e) => {
@@ -77,11 +93,6 @@ export default function ImageCard(props: { className?: string }) {
             <span className="text-white/50 text-center p-4">
               No image selected
             </span>
-          )}
-          {preview && (
-            <div className="absolute bottom-2 left-2 bg-white/20 text-white px-3 py-1 rounded-full text-xs">
-              Click to preview
-            </div>
           )}
         </div>
 
@@ -105,13 +116,16 @@ export default function ImageCard(props: { className?: string }) {
             }`}
             disabled={loading}
           >
-            {loading ? "Generating..." : "Generate"}
+            {loading ? "Generating..." : "Generate Description"}
           </button>
 
           {selectedImage && (
             <p className="text-white/70 text-sm mt-2 truncate">
               Selected: {selectedImage.name}
             </p>
+          )}
+          {description && (
+            <p className="text-white mt-2 text-center">{description}</p>
           )}
         </div>
       </div>
@@ -144,13 +158,16 @@ export default function ImageCard(props: { className?: string }) {
               leaveFrom="opacity-100 scale-100"
               leaveTo="opacity-0 scale-95"
             >
-              <Dialog.Panel className="bg-white/5 backdrop-blur-2xl rounded-2xl overflow-hidden max-w-3xl w-full max-h-[90vh] flex items-center justify-center shadow-xl border border-white/20">
+              <Dialog.Panel className="backdrop-blur-2xl rounded-2xl overflow-hidden max-w-3xl w-full max-h-[90vh] flex flex-col items-center justify-center shadow-xl border border-white/20 p-4 bg-black/30">
                 {preview && (
-                  <img
+                  <Image
                     src={preview}
                     alt="Preview Modal"
-                    className="object-contain w-full h-full p-4"
+                    className="object-contain max-h-[70vh] w-full"
                   />
+                )}
+                {description && (
+                  <p className="text-white mt-4 text-center">{description}</p>
                 )}
               </Dialog.Panel>
             </Transition.Child>

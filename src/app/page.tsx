@@ -1,13 +1,13 @@
 import ImageAnalysis from "./_components/ImageAnalysis";
 
-import Header from "./_features/Header";
+import { WarpBackground } from "@/components/ui/warp-background";
 
 export default function Home() {
   return (
-    <div className="flex flex-col justify-center ">
-      {/* <Header /> */}
-      
-      <ImageAnalysis />
-    </div>
+    <WarpBackground>
+      <div className="flex flex-col justify-center ">
+        <ImageAnalysis />
+      </div>
+    </WarpBackground>
   );
 }
