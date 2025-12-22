@@ -27,24 +27,16 @@ export default function ImageCard(props: { className?: string }) {
     setLoading(true);
 
     try {
-      // 1️⃣ Зураг upload
       const formData = new FormData();
       formData.append("image", selectedImage);
-      const uploadRes = await fetch("http://localhost:1000/image", {
+
+      const res = await fetch("http://localhost:1000/describe-image", {
         method: "POST",
         body: formData,
       });
-      const uploadData = await uploadRes.json();
-      const filename = uploadData.filename;
 
-      // 2️⃣ Hugging Face-р description авах
-      const descRes = await fetch("http://localhost:1000/describe", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ filename }),
-      });
-      const descData = await descRes.json();
-      setDescription(descData.description);
+      const data = await res.json();
+      setDescription(data.description);
       setIsModalOpen(true);
     } catch (err) {
       console.error(err);
@@ -63,7 +55,7 @@ export default function ImageCard(props: { className?: string }) {
   return (
     <>
       <div
-        className={`w-full max-w-4xl mx-auto border border-white/10 rounded-3xl flex flex-col md:flex-row overflow-hidden shadow-xl transition hover:scale-[1.01] ${
+        className={`border border-white/10 rounded-3xl flex flex-col md:flex-row transition hover:scale-[1.01] ${
           className ?? ""
         }`}
       >
@@ -148,7 +140,7 @@ export default function ImageCard(props: { className?: string }) {
             <div className="fixed inset-0 bg-black/60" />
           </Transition.Child>
 
-          <div className="fixed inset-0 flex items-center justify-center p-4">
+          <div className="flex items-center justify-center p-4">
             <Transition.Child
               as={Fragment}
               enter="ease-out duration-300"
@@ -158,7 +150,7 @@ export default function ImageCard(props: { className?: string }) {
               leaveFrom="opacity-100 scale-100"
               leaveTo="opacity-0 scale-95"
             >
-              <Dialog.Panel className="backdrop-blur-2xl rounded-2xl overflow-hidden max-w-3xl w-full max-h-[90vh] flex flex-col items-center justify-center shadow-xl border border-white/20 p-4 bg-black/30">
+              <Dialog.Panel className="backdrop-blur-2xl rounded-2xl overflow-hidden max-w-3xl w-full flex flex-col items-center justify-center shadow-xl border border-white/20  bg-black/30">
                 {preview && (
                   <Image
                     src={preview}

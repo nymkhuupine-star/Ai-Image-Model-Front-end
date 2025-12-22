@@ -7,7 +7,7 @@ const categories = ["Image to image", "Popular", "Trending"];
 
 export default function ImageAnalysis() {
   return (
-    <div className=" text-white flex justify-center pt-24">
+    <div className="  flex justify-center pt-24">
       <Tab.Group>
         <Tab.List className="flex  justify-center gap-3">
           {categories.map((name) => (
@@ -15,7 +15,7 @@ export default function ImageAnalysis() {
               key={name}
               className={({ selected }) =>
                 `px-4 py-2 rounded-full text-sm font-semibold ${
-                  selected ? "bg-white text-black" : "bg-white/10 text-white"
+                  selected ? "bg-white text-black" : "bg-slate-500 text-white"
                 }`
               }
             >
@@ -24,10 +24,10 @@ export default function ImageAnalysis() {
           ))}
         </Tab.List>
 
-        <Tab.Panels className=" rounded-xl w-[1000px] ">
+        <Tab.Panels className=" rounded-xl w-[1000px]  ">
           <Tab.Panel>
-            <div className="flex justify-center  items-center w-full py-12">
-              <div className="w-full min-h-screen bg-gray-900 max-w-4xl">
+            <div className="flex justify-center   items-center w-full py-12">
+              <div className="w-full rounded-3xl bg-slate-500  ">
                 <ImageCard className="h-[500px] md:h-[550px]" />
               </div>
             </div>
