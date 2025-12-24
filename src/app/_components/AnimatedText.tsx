@@ -8,7 +8,11 @@ interface AnimatedTextProps {
   speed?: number; // milliseconds per character
 }
 
-export function AnimatedText({ text, className = "", speed = 30 }: AnimatedTextProps) {
+export function AnimatedText({
+  text,
+  className = "",
+  speed = 30,
+}: AnimatedTextProps) {
   const [displayedText, setDisplayedText] = useState("");
   const [currentIndex, setCurrentIndex] = useState(0);
 
