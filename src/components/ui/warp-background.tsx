@@ -1,10 +1,11 @@
+/* eslint-disable react-hooks/purity */
 "use client";
 
-import React, { HTMLAttributes, useCallback, useMemo } from "react";
+import React, { useCallback, useMemo } from "react";
 import { motion } from "motion/react";
 import { cn } from "@/lib/utils";
 
-interface WarpBackgroundProps extends HTMLAttributes<HTMLDivElement> {
+type WarpBackgroundProps = {
   children: React.ReactNode;
   perspective?: number;
   beamsPerSide?: number;
@@ -13,7 +14,7 @@ interface WarpBackgroundProps extends HTMLAttributes<HTMLDivElement> {
   beamDelayMin?: number;
   beamDuration?: number;
   gridColor?: string;
-}
+} & React.HTMLAttributes<HTMLDivElement>;
 
 const Beam = ({
   width,
@@ -27,6 +28,7 @@ const Beam = ({
   duration: number;
 }) => {
   const hue = Math.floor(Math.random() * 360);
+
   const ar = Math.floor(Math.random() * 10) + 1;
 
   return (

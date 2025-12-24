@@ -1,10 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { 
-  LanguageIcon,
-  TrashIcon
-} from "@heroicons/react/24/outline";
+import { LanguageIcon, TrashIcon } from "@heroicons/react/24/outline";
 
 export default function TextToTextCard(props: { className?: string }) {
   const { className } = props;
@@ -25,16 +22,19 @@ export default function TextToTextCard(props: { className?: string }) {
     setGeneratedText(null);
 
     try {
-      const res = await fetch('http://localhost:1000/api/text-to-text/translate', {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ 
-          text: inputText,
-          task: 'translate'
-        }),
-      });
+      const res = await fetch(
+        "http://localhost:1000/api/text-to-text/translate",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            text: inputText,
+            task: "translate",
+          }),
+        }
+      );
 
       if (!res.ok) {
         const errorData = await res.json().catch(() => ({}));
@@ -68,6 +68,7 @@ export default function TextToTextCard(props: { className?: string }) {
 
   const handleCopy = () => {
     if (generatedText) {
+      // eslint-disable-next-line @typescript-eslint/no-floating-promises
       navigator.clipboard.writeText(generatedText);
     }
   };
@@ -82,7 +83,9 @@ export default function TextToTextCard(props: { className?: string }) {
         <div className="flex items-center gap-2 px-4 py-2">
           <LanguageIcon className="w-5 h-5 text-purple-400" />
           <h2 className="text-lg font-semibold text-white">Text Translation</h2>
-          <span className="ml-auto text-xs text-white/50">English → Russian</span>
+          <span className="ml-auto text-xs text-white/50">
+            English → Russian
+          </span>
         </div>
       </div>
 
@@ -141,7 +144,9 @@ export default function TextToTextCard(props: { className?: string }) {
         {/* OUTPUT AREA */}
         <div className="md:w-1/2 p-6 flex flex-col gap-4">
           <div className="flex items-center justify-between">
-            <label className="text-white/70 text-sm">Translated Text (Russian):</label>
+            <label className="text-white/70 text-sm">
+              Translated Text (Russian):
+            </label>
             {generatedText && (
               <button
                 onClick={handleCopy}
@@ -156,7 +161,9 @@ export default function TextToTextCard(props: { className?: string }) {
             {loading && (
               <div className="flex flex-col items-center justify-center h-full gap-2">
                 <div className="w-8 h-8 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                <p className="text-white/60 text-sm">Translating your text...</p>
+                <p className="text-white/60 text-sm">
+                  Translating your text...
+                </p>
               </div>
             )}
 
@@ -178,7 +185,9 @@ export default function TextToTextCard(props: { className?: string }) {
           {/* STATUS MESSAGE */}
           <div className="p-3 rounded-xl border border-white/20 flex items-center justify-center min-h-[50px]">
             {loading && (
-              <p className="text-white/60 text-sm">Processing your request...</p>
+              <p className="text-white/60 text-sm">
+                Processing your request...
+              </p>
             )}
 
             {!loading && !generatedText && !error && (
@@ -186,12 +195,12 @@ export default function TextToTextCard(props: { className?: string }) {
             )}
 
             {!loading && generatedText && (
-              <p className="text-green-400 text-sm">✓ Translation completed successfully!</p>
+              <p className="text-green-400 text-sm">
+                ✓ Translation completed successfully!
+              </p>
             )}
 
-            {error && (
-              <p className="text-red-400 text-sm">{error}</p>
-            )}
+            {error && <p className="text-red-400 text-sm">{error}</p>}
           </div>
         </div>
       </div>

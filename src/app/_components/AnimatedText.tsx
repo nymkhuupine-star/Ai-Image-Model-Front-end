@@ -2,11 +2,11 @@
 
 import { useState, useEffect } from "react";
 
-interface AnimatedTextProps {
+type AnimatedTextProps = {
   text: string;
   className?: string;
-  speed?: number; // milliseconds per character
-}
+  speed?: number;
+};
 
 export function AnimatedText({
   text,
@@ -17,7 +17,7 @@ export function AnimatedText({
   const [currentIndex, setCurrentIndex] = useState(0);
 
   useEffect(() => {
-    // Reset when text changes
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setDisplayedText("");
     setCurrentIndex(0);
   }, [text]);

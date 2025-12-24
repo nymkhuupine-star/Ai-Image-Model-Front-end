@@ -206,14 +206,14 @@ export default function TextToImageCard(props: { className?: string }) {
               <Dialog.Panel className="bg-black/30 backdrop-blur-2xl rounded-2xl max-w-4xl w-full border border-white/20 relative overflow-hidden">
                 {generatedImage && (
                   <>
-                    <img
+                    <Image
                       src={generatedImage}
                       className="max-h-[80vh] w-full object-contain"
                       alt="Generated"
                     />
                     <div className="p-6">
                       <p className="text-white/70 text-center italic">
-                        "{prompt}"
+                        &quot;{prompt} &quot;
                       </p>
                     </div>
                   </>
