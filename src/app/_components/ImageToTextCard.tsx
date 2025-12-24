@@ -6,7 +6,6 @@ import { TrashIcon } from "@heroicons/react/24/outline";
 import Image from "next/image";
 import { AnimatedText } from "./AnimatedText";
 
-
 export default function ImageToTextCard(props: { className?: string }) {
   const { className } = props;
 
@@ -86,8 +85,9 @@ export default function ImageToTextCard(props: { className?: string }) {
   return (
     <>
       <div
-        className={`border border-white/10 rounded-3xl flex flex-col md:flex-row transition hover:scale-[1.01] ${className ?? ""
-          }`}
+        className={`border border-white/10 rounded-3xl flex flex-col md:flex-row transition hover:scale-[1.01] ${
+          className ?? ""
+        }`}
       >
         {/* IMAGE AREA */}
         <div
@@ -133,10 +133,11 @@ export default function ImageToTextCard(props: { className?: string }) {
           <button
             onClick={handleGenerate}
             disabled={loading || !selectedImage}
-            className={`rounded-full py-3 font-semibold text-white transition ${loading || !selectedImage
+            className={`rounded-full py-3 font-semibold text-white transition ${
+              loading || !selectedImage
                 ? "bg-white/30 cursor-not-allowed"
                 : "bg-gradient-to-r from-purple-500 to-pink-500 hover:scale-105"
-              }`}
+            }`}
           >
             {loading ? "Generating..." : "Generate Description"}
           </button>
@@ -155,7 +156,7 @@ export default function ImageToTextCard(props: { className?: string }) {
               <AnimatedText
                 text={description}
                 className="text-base md:text-lg"
-                speed={20} 
+                speed={20}
               />
             )}
 
@@ -164,9 +165,7 @@ export default function ImageToTextCard(props: { className?: string }) {
             )}
           </div>
 
-          {error && (
-            <p className="text-red-400 text-sm text-center">{error}</p>
-          )}
+          {error && <p className="text-red-400 text-sm text-center">{error}</p>}
         </div>
       </div>
 
