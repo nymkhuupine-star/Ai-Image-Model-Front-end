@@ -3,6 +3,7 @@ import { useState, Fragment } from "react";
 import { Dialog, Transition } from "@headlessui/react";
 import { TrashIcon, SparklesIcon } from "@heroicons/react/24/outline";
 import Image from "next/image";
+import axios from "axios";
 export default function TextToImageCard(props: { className?: string }) {
   const { className } = props;
   const [prompt, setPrompt] = useState("");
@@ -10,47 +11,45 @@ export default function TextToImageCard(props: { className?: string }) {
   const [loading, setLoading] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
   const handleGenerate = async () => {
     if (!prompt.trim()) {
       setError("Please enter a prompt");
       return;
     }
+
     setLoading(true);
     setError(null);
     setGeneratedImage(null);
+
     try {
-      const res = await fetch(
+      const res = await axios.post(
         "https://ai-image-model-back-end.onrender.com/api/text-to-image/generate",
+        { prompt }, // axios-д body-гаа шууд объект болгон дамжуулна
         {
-          method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({ prompt }),
         }
       );
-      if (!res.ok) {
-        const errorData = await res.json().catch(() => ({}));
-        throw new Error(errorData.error || `Server error: ${res.status}`);
-      }
-      const data = await res.json();
+
+      const data = res.data; // Axios-д response JSON нь res.data-д байдаг
+
       if (data.success && data.imageUrl) {
         setGeneratedImage(data.imageUrl);
         setIsModalOpen(true);
       } else {
         setError("Failed to generate image");
       }
-    } catch (err) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (err: any) {
       console.error("Error:", err);
-      setError(
-        err instanceof Error
-          ? err.message
-          : "Failed to generate image. Please try again."
-      );
+      setError(err?.message || "Failed to generate image. Please try again.");
     } finally {
       setLoading(false);
     }
   };
+
   const handleDelete = () => {
     setGeneratedImage(null);
     setPrompt("");

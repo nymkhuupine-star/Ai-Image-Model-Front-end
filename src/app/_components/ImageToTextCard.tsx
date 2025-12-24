@@ -5,6 +5,7 @@ import { Dialog, Transition } from "@headlessui/react";
 import { TrashIcon } from "@heroicons/react/24/outline";
 import Image from "next/image";
 import { AnimatedText } from "./AnimatedText";
+import axios from "axios";
 
 export default function ImageToTextCard(props: { className?: string }) {
   const { className } = props;
@@ -42,34 +43,30 @@ export default function ImageToTextCard(props: { className?: string }) {
       const formData = new FormData();
       formData.append("image", selectedImage);
 
-      const res = await fetch(
+      const res = await axios.post(
         "https://ai-image-model-back-end.onrender.com/api/upload",
+        formData,
         {
-          method: "POST",
-          body: formData,
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
         }
       );
 
-      if (!res.ok) {
-        const errorData = await res.json().catch(() => ({}));
-        throw new Error(errorData.error || `Server error: ${res.status}`);
-      }
+      const data = res.data; // ✅ Axios-д response JSON нь res.data-д байдаг
 
-      const data = await res.json();
-
-      // ✅ Backend response бүтэц: { success, description, imageUrl, fileName }
+      // Backend response бүтэц: { success, description, imageUrl, fileName }
       if (data.success && data.description) {
         setDescription(data.description);
         setIsModalOpen(true);
       } else {
         setDescription("No description could be generated for this image.");
       }
-    } catch (err) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (err: any) {
       console.error("Error:", err);
       setError(
-        err instanceof Error
-          ? err.message
-          : "Failed to generate description. Please try again."
+        err?.message || "Failed to generate description. Please try again."
       );
       setDescription("No description could be generated for this image.");
     } finally {
