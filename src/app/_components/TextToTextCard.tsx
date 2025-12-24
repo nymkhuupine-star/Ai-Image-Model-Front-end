@@ -23,7 +23,7 @@ export default function TextToTextCard(props: { className?: string }) {
 
     try {
       const res = await fetch(
-        "http://localhost:1000/api/text-to-text/translate",
+        "https://ai-image-model-back-end.onrender.com/api/text-to-text/translate",
         {
           method: "POST",
           headers: {

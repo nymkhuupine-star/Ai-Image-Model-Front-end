@@ -20,7 +20,7 @@ export default function TextToImageCard(props: { className?: string }) {
     setGeneratedImage(null);
     try {
       const res = await fetch(
-        "http://localhost:1000/api/text-to-image/generate",
+        "https://ai-image-model-back-end.onrender.com/api/text-to-image/generate",
         {
           method: "POST",
           headers: {

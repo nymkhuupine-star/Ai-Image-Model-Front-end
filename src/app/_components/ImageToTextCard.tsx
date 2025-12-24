@@ -42,10 +42,13 @@ export default function ImageToTextCard(props: { className?: string }) {
       const formData = new FormData();
       formData.append("image", selectedImage);
 
-      const res = await fetch("http://localhost:1000/api/upload", {
-        method: "POST",
-        body: formData,
-      });
+      const res = await fetch(
+        "https://ai-image-model-back-end.onrender.com/api/upload",
+        {
+          method: "POST",
+          body: formData,
+        }
+      );
 
       if (!res.ok) {
         const errorData = await res.json().catch(() => ({}));
