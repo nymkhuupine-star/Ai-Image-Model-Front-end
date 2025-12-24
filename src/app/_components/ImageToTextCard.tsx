@@ -1,16 +1,18 @@
 "use client";
 
-import { useState } from "react";
+import { useState, Fragment } from "react";
 import { Dialog, Transition } from "@headlessui/react";
-import { Fragment } from "react";
 import { TrashIcon } from "@heroicons/react/24/outline";
 import Image from "next/image";
+import { AnimatedText } from "./AnimatedText";
 
-export default function ImageCard(props: { className?: string }) {
+
+export default function ImageToTextCard(props: { className?: string }) {
   const { className } = props;
+
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
-  const [description, setDescription] = useState<string | null>(null);
+  const [description, setDescription] = useState("");
   const [loading, setLoading] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -18,74 +20,76 @@ export default function ImageCard(props: { className?: string }) {
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files || e.target.files.length === 0) return;
     const file = e.target.files[0];
-    
-    // Файлын хэмжээ шалгах (5MB)
-    if (file.size > 5 * 1024 * 1024) {
-      setError("File size must be less than 5MB");
+
+    if (file.size > 10 * 1024 * 1024) {
+      setError("File size must be less than 10MB");
       return;
     }
-    
+
     setSelectedImage(file);
     setPreview(URL.createObjectURL(file));
-    setDescription(null);
+    setDescription("");
     setError(null);
   };
 
   const handleGenerate = async () => {
     if (!selectedImage) return;
+
     setLoading(true);
     setError(null);
+    setDescription("");
 
     try {
       const formData = new FormData();
       formData.append("image", selectedImage);
 
-      console.log("📤 Sending request...");
-      
-      const res = await fetch("http://localhost:1000/describe-image", {
+      const res = await fetch("http://localhost:1000/api/upload", {
         method: "POST",
         body: formData,
       });
 
-      console.log("📥 Response status:", res.status);
-
       if (!res.ok) {
         const errorData = await res.json().catch(() => ({}));
-        throw new Error(errorData.message || `Server error: ${res.status}`);
+        throw new Error(errorData.error || `Server error: ${res.status}`);
       }
 
       const data = await res.json();
-      console.log("✅ Data received:", data);
-      
-      setDescription(data.description);
-      setIsModalOpen(true);
+
+      // ✅ Backend response бүтэц: { success, description, imageUrl, fileName }
+      if (data.success && data.description) {
+        setDescription(data.description);
+        setIsModalOpen(true);
+      } else {
+        setDescription("No description could be generated for this image.");
+      }
     } catch (err) {
-      console.error("❌ Error:", err);
-      const errorMessage = err instanceof Error ? err.message : "Failed to generate description";
-      setError(errorMessage);
-      alert(errorMessage);
+      console.error("Error:", err);
+      setError(
+        err instanceof Error
+          ? err.message
+          : "Failed to generate description. Please try again."
+      );
+      setDescription("No description could be generated for this image.");
     } finally {
       setLoading(false);
     }
   };
 
   const handleDelete = () => {
-    if (preview) {
-      URL.revokeObjectURL(preview);
-    }
+    if (preview) URL.revokeObjectURL(preview);
     setSelectedImage(null);
     setPreview(null);
-    setDescription(null);
+    setDescription("");
     setError(null);
   };
 
   return (
     <>
       <div
-        className={`border border-white/10 rounded-3xl flex flex-col md:flex-row transition hover:scale-[1.01] ${
-          className ?? ""
-        }`}
+        className={`border border-white/10 rounded-3xl flex flex-col md:flex-row transition hover:scale-[1.01] ${className ?? ""
+          }`}
       >
+        {/* IMAGE AREA */}
         <div
           className="relative md:w-1/2 h-64 md:h-auto border-b md:border-b-0 md:border-r border-white/10 flex items-center justify-center cursor-pointer overflow-hidden rounded-l-3xl"
           onClick={() => preview && setIsModalOpen(true)}
@@ -95,30 +99,28 @@ export default function ImageCard(props: { className?: string }) {
               <Image
                 src={preview}
                 alt="Preview"
-                className="object-cover transition-transform duration-500 hover:scale-105"
                 fill
-                sizes="(max-width: 768px) 100vw, 50vw"
+                className="object-cover"
               />
               <button
                 onClick={(e) => {
                   e.stopPropagation();
                   handleDelete();
                 }}
-                className="absolute bottom-2 right-2 bg-red-600/70 hover:bg-red-500 text-white p-2 rounded-full transition z-10"
+                className="absolute bottom-2 right-2 bg-red-600/70 hover:bg-red-500 text-white p-2 rounded-full transition"
                 aria-label="Delete image"
               >
                 <TrashIcon className="w-5 h-5" />
               </button>
             </>
           ) : (
-            <span className="text-white/50 text-center p-4">
-              No image selected
-            </span>
+            <span className="text-white/40">No image selected</span>
           )}
         </div>
 
-        <div className="md:w-1/2 p-6 flex flex-col justify-center gap-4">
-          <label className="cursor-pointer flex items-center justify-center gap-2 bg-white/10 hover:bg-white/20 transition rounded-full py-2 text-white text-sm font-medium">
+        {/* ACTION AREA */}
+        <div className="md:w-1/2 p-6 flex flex-col gap-4">
+          <label className="cursor-pointer flex justify-center bg-white/10 hover:bg-white/20 rounded-full py-2 text-white text-sm transition">
             Choose File
             <input
               type="file"
@@ -130,32 +132,45 @@ export default function ImageCard(props: { className?: string }) {
 
           <button
             onClick={handleGenerate}
-            className={`w-full rounded-full py-3 font-semibold text-white transition transform ${
-              loading || !selectedImage
+            disabled={loading || !selectedImage}
+            className={`rounded-full py-3 font-semibold text-white transition ${loading || !selectedImage
                 ? "bg-white/30 cursor-not-allowed"
                 : "bg-gradient-to-r from-purple-500 to-pink-500 hover:scale-105"
-            } ${loading ? "animate-pulse" : ""}`}
-            disabled={loading || !selectedImage}
+              }`}
           >
             {loading ? "Generating..." : "Generate Description"}
           </button>
 
-          {error && (
-            <p className="text-red-400 text-sm mt-2 text-center">{error}</p>
-          )}
+          {/* RESULT BOX */}
+          <div className="mt-2 p-4 min-h-[80px] rounded-xl border border-white/20 text-center">
+            {loading && (
+              <p className="text-white/60">Generating description...</p>
+            )}
 
-          {selectedImage && (
-            <p className="text-white/70 text-sm mt-2 truncate">
-              Selected: {selectedImage.name}
-            </p>
-          )}
-          
-          {description && !isModalOpen && (
-            <p className="text-white mt-2 text-center text-sm">{description}</p>
+            {!loading && description === "" && (
+              <p className="text-white/40">Generated text will appear here</p>
+            )}
+
+            {!loading && description !== "" && (
+              <AnimatedText
+                text={description}
+                className="text-base md:text-lg"
+                speed={20} 
+              />
+            )}
+
+            {!loading && description !== "" && (
+              <p className="text-white">{description}</p>
+            )}
+          </div>
+
+          {error && (
+            <p className="text-red-400 text-sm text-center">{error}</p>
           )}
         </div>
       </div>
 
+      {/* MODAL */}
       <Transition appear show={isModalOpen} as={Fragment}>
         <Dialog
           as="div"
@@ -184,26 +199,26 @@ export default function ImageCard(props: { className?: string }) {
               leaveFrom="opacity-100 scale-100"
               leaveTo="opacity-0 scale-95"
             >
-              <Dialog.Panel className="backdrop-blur-2xl rounded-2xl overflow-hidden max-w-3xl w-full shadow-xl border border-white/20 bg-black/30">
-                <div className="relative w-full" style={{ maxHeight: '70vh' }}>
-                  {preview && (
-                    <div className="relative w-full h-full flex items-center justify-center">
-                      <img
-                        src={preview}
-                        alt="Preview Modal"
-                        className="object-contain max-h-[70vh] w-full"
-                      />
-                    </div>
-                  )}
-                </div>
+              <Dialog.Panel className="bg-black/30 backdrop-blur-2xl rounded-2xl max-w-3xl w-full border border-white/20 relative overflow-hidden">
+                {preview && (
+                  <img
+                    src={preview}
+                    className="max-h-[70vh] w-full object-contain"
+                    alt="Preview"
+                  />
+                )}
+
                 {description && (
                   <div className="p-6">
-                    <p className="text-white text-center text-lg">{description}</p>
+                    <p className="text-white text-center text-lg">
+                      {description}
+                    </p>
                   </div>
                 )}
+
                 <button
                   onClick={() => setIsModalOpen(false)}
-                  className="absolute top-4 right-4 bg-white/10 hover:bg-white/20 text-white px-4 py-2 rounded-full transition"
+                  className="absolute top-4 right-4 bg-white/10 hover:bg-white/20 px-4 py-2 rounded-full text-white transition"
                 >
                   Close
                 </button>

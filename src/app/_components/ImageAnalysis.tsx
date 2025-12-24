@@ -1,9 +1,11 @@
 "use client";
 
 import { Tab } from "@headlessui/react";
-import ImageCard from "./ImageCard";
+import ImageToTextCard from "./ImageToTextCard";
+import TextToImageCard from "./TextToImageCard";
+import TextToTextCard from "./TextToTextCard";
 
-const categories = ["Image to image", "Popular", "Trending"];
+const categories = ["Image analysis", "Image creator", "Ingredient recognition"];
 
 export default function ImageAnalysis() {
   return (
@@ -28,12 +30,20 @@ export default function ImageAnalysis() {
           <Tab.Panel>
             <div className="flex justify-center   items-center w-full py-12">
               <div className="w-full rounded-3xl bg-slate-500  ">
-                <ImageCard className="h-[500px] md:h-[550px]" />
+                <ImageToTextCard className="h-[500px] md:h-[550px]" />
               </div>
             </div>
           </Tab.Panel>
-          <Tab.Panel>Popular content</Tab.Panel>
-          <Tab.Panel>Trending content</Tab.Panel>
+          <Tab.Panel> <div className="flex justify-center   items-center w-full py-12">
+              <div className="w-full rounded-3xl bg-slate-500  ">
+                <TextToImageCard className="h-[500px] md:h-[550px]" />
+              </div>
+            </div></Tab.Panel>
+          <Tab.Panel><div className="flex justify-center   items-center w-full py-12">
+              <div className="w-full rounded-3xl bg-slate-500  ">
+                <TextToTextCard className="h-[500px] md:h-[550px]" />
+              </div>
+            </div></Tab.Panel>
         </Tab.Panels>
       </Tab.Group>
     </div>
