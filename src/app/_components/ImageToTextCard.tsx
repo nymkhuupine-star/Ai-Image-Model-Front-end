@@ -103,7 +103,7 @@ export default function ImageToTextCard(props: { className?: string }) {
 
   const handleCopy = () => {
     if (!description) return;
-    navigator.clipboard.writeText(description);
+    void navigator.clipboard.writeText(description);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
@@ -146,7 +146,7 @@ export default function ImageToTextCard(props: { className?: string }) {
               ) : (
                 <>
                   <PhotoIcon className="w-12 h-12 text-white/30" />
-                  <span className="text-white/40 text-sm">Click "Choose File" or drag & drop an image here</span>
+                  <span className="text-white/40 text-sm">Click &quot;Choose File&quot; or drag &amp; drop an image here</span>
                 </>
               )}
             </div>
@@ -241,6 +241,7 @@ export default function ImageToTextCard(props: { className?: string }) {
             >
               <Dialog.Panel className="bg-black/30 backdrop-blur-2xl rounded-2xl max-w-2xl w-full border border-white/20 relative max-h-[85vh] flex flex-col overflow-hidden">
                 {preview && (
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img src={preview} className="max-h-[45vh] w-full object-contain shrink-0" alt="Preview" />
                 )}
 
