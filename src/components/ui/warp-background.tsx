@@ -16,20 +16,27 @@ type WarpBackgroundProps = {
   gridColor?: string;
 } & React.HTMLAttributes<HTMLDivElement>;
 
+// Deterministic pseudo-random based on seed — same on server and client
+const seeded = (seed: number) => {
+  const x = Math.sin(seed + 1) * 10000;
+  return x - Math.floor(x);
+};
+
 const Beam = ({
   width,
   x,
   delay,
   duration,
+  seed,
 }: {
   width: string | number;
   x: string | number;
   delay: number;
   duration: number;
+  seed: number;
 }) => {
-  const hue = Math.floor(Math.random() * 360);
-
-  const ar = Math.floor(Math.random() * 10) + 1;
+  const hue = Math.floor(seeded(seed) * 360);
+  const ar = Math.floor(seeded(seed + 100) * 10) + 1;
 
   return (
     <motion.div
@@ -66,24 +73,24 @@ export const WarpBackground: React.FC<WarpBackgroundProps> = ({
   gridColor = "var(--border)",
   ...props
 }) => {
-  const generateBeams = useCallback(() => {
+  const generateBeams = useCallback((sideOffset: number) => {
     const beams = [];
     const cellsPerSide = Math.floor(100 / beamSize);
     const step = cellsPerSide / beamsPerSide;
 
     for (let i = 0; i < beamsPerSide; i++) {
       const x = Math.floor(i * step);
-      const delay =
-        Math.random() * (beamDelayMax - beamDelayMin) + beamDelayMin;
-      beams.push({ x, delay });
+      const seed = sideOffset * 100 + i;
+      const delay = seeded(seed + 200) * (beamDelayMax - beamDelayMin) + beamDelayMin;
+      beams.push({ x, delay, seed });
     }
     return beams;
   }, [beamsPerSide, beamSize, beamDelayMax, beamDelayMin]);
 
-  const topBeams = useMemo(() => generateBeams(), [generateBeams]);
-  const rightBeams = useMemo(() => generateBeams(), [generateBeams]);
-  const bottomBeams = useMemo(() => generateBeams(), [generateBeams]);
-  const leftBeams = useMemo(() => generateBeams(), [generateBeams]);
+  const topBeams = useMemo(() => generateBeams(0), [generateBeams]);
+  const rightBeams = useMemo(() => generateBeams(1), [generateBeams]);
+  const bottomBeams = useMemo(() => generateBeams(2), [generateBeams]);
+  const leftBeams = useMemo(() => generateBeams(3), [generateBeams]);
 
   return (
     <div
@@ -110,6 +117,7 @@ export const WarpBackground: React.FC<WarpBackgroundProps> = ({
               x={`${beam.x * beamSize}%`}
               delay={beam.delay}
               duration={beamDuration}
+              seed={beam.seed}
             />
           ))}
         </div>
@@ -122,6 +130,7 @@ export const WarpBackground: React.FC<WarpBackgroundProps> = ({
               x={`${beam.x * beamSize}%`}
               delay={beam.delay}
               duration={beamDuration}
+              seed={beam.seed}
             />
           ))}
         </div>
@@ -134,6 +143,7 @@ export const WarpBackground: React.FC<WarpBackgroundProps> = ({
               x={`${beam.x * beamSize}%`}
               delay={beam.delay}
               duration={beamDuration}
+              seed={beam.seed}
             />
           ))}
         </div>
@@ -146,6 +156,7 @@ export const WarpBackground: React.FC<WarpBackgroundProps> = ({
               x={`${beam.x * beamSize}%`}
               delay={beam.delay}
               duration={beamDuration}
+              seed={beam.seed}
             />
           ))}
         </div>

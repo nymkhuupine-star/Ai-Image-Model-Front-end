@@ -5,7 +5,7 @@ import ImageToTextCard from "./ImageToTextCard";
 import TextToImageCard from "./TextToImageCard";
 import TextToTextCard from "./TextToTextCard";
 
-const categories = ["Image analysis", "Image creator", "Ingredient recognition"];
+const categories = ["Image analysis", "Image creator", "Text translation"];
 
 export default function ImageAnalysis() {
   return (
