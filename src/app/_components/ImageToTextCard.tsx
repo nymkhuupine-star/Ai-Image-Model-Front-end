@@ -239,24 +239,27 @@ export default function ImageToTextCard(props: { className?: string }) {
               enter="ease-out duration-300" enterFrom="opacity-0 scale-95" enterTo="opacity-100 scale-100"
               leave="ease-in duration-200" leaveFrom="opacity-100 scale-100" leaveTo="opacity-0 scale-95"
             >
-              <Dialog.Panel className="bg-black/30 backdrop-blur-2xl rounded-2xl max-w-2xl w-full border border-white/20 relative max-h-[85vh] flex flex-col overflow-hidden">
+              <Dialog.Panel className="bg-black/30 backdrop-blur-2xl rounded-2xl max-w-xl w-full border border-white/20 relative max-h-[75vh] flex flex-col overflow-hidden">
+                {/* Close button — always visible at top right */}
+                <div className="shrink-0 flex justify-end px-4 pt-3">
+                  <button
+                    onClick={() => setIsModalOpen(false)}
+                    className="bg-white/10 hover:bg-white/20 px-4 py-1.5 rounded-full text-white text-sm transition"
+                  >
+                    Close
+                  </button>
+                </div>
+
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 {preview && (
-                  <img src={preview} className="max-h-[45vh] w-full object-contain shrink-0" alt="Preview" />
+                  <img src={preview} className="max-h-[35vh] w-full object-contain shrink-0" alt="Preview" />
                 )}
 
                 {description && (
-                  <div className="p-5 overflow-y-auto">
-                    <p className="text-white text-center text-base">{description}</p>
+                  <div className="p-4 overflow-y-auto">
+                    <p className="text-white text-center text-sm leading-relaxed">{description}</p>
                   </div>
                 )}
-
-                <button
-                  onClick={() => setIsModalOpen(false)}
-                  className="absolute top-3 right-3 bg-white/10 hover:bg-white/20 px-3 py-1.5 rounded-full text-white text-sm transition"
-                >
-                  Close
-                </button>
               </Dialog.Panel>
             </Transition.Child>
           </div>
