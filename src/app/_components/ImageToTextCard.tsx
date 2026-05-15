@@ -240,8 +240,8 @@ export default function ImageToTextCard(props: { className?: string }) {
               leave="ease-in duration-200" leaveFrom="opacity-100 scale-100" leaveTo="opacity-0 scale-95"
             >
               <Dialog.Panel className="bg-black/30 backdrop-blur-2xl rounded-2xl max-w-2xl w-full border border-white/20 relative max-h-[85vh] flex flex-col overflow-hidden">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
                 {preview && (
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img src={preview} className="max-h-[45vh] w-full object-contain shrink-0" alt="Preview" />
                 )}
 
