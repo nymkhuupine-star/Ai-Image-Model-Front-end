@@ -5,7 +5,6 @@ import { Dialog, Transition } from "@headlessui/react";
 import { TrashIcon, ClipboardDocumentIcon, CheckIcon, ArrowUpTrayIcon, PhotoIcon } from "@heroicons/react/24/outline";
 import Image from "next/image";
 import { AnimatedText } from "./AnimatedText";
-import axios from "axios";
 
 export default function ImageToTextCard(props: { className?: string }) {
   const { className } = props;
@@ -64,17 +63,20 @@ export default function ImageToTextCard(props: { className?: string }) {
       const formData = new FormData();
       formData.append("image", selectedImage);
 
-      const res = await axios.post(
+      const res = await fetch(
         "https://ai-image-model-back-end.onrender.com/api/upload",
-        formData,
         {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
+          method: "POST",
+          body: formData,
         }
       );
 
-      const data = res.data;
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({}));
+        throw new Error(errorData.message || `Server error: ${res.status}`);
+      }
+
+      const data = await res.json();
 
       if (data.success && data.description) {
         setDescription(data.description);
@@ -82,11 +84,12 @@ export default function ImageToTextCard(props: { className?: string }) {
       } else {
         setDescription("No description could be generated for this image.");
       }
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } catch (err: any) {
+    } catch (err) {
       console.error("Error:", err);
       setError(
-        err?.message || "Failed to generate description. Please try again."
+        err instanceof Error
+          ? err.message
+          : "Failed to generate description. Please try again."
       );
     } finally {
       setLoading(false);
@@ -117,7 +120,7 @@ export default function ImageToTextCard(props: { className?: string }) {
       >
         {/* IMAGE AREA — drag & drop */}
         <div
-          className={`relative md:w-1/2 h-64 md:h-auto border-b md:border-b-0 md:border-r border-white/10 flex items-center justify-center cursor-pointer overflow-hidden rounded-l-3xl transition-colors ${
+          className={`relative md:w-1/2 h-56 sm:h-64 md:h-auto border-b md:border-b-0 md:border-r border-white/10 flex items-center justify-center cursor-pointer overflow-hidden rounded-t-3xl md:rounded-t-none md:rounded-l-3xl transition-colors ${
             isDragging ? "bg-purple-500/20 border-purple-400" : ""
           }`}
           onClick={() => preview && setIsModalOpen(true)}

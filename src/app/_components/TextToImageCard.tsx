@@ -3,7 +3,6 @@ import { useState, Fragment } from "react";
 import { Dialog, Transition } from "@headlessui/react";
 import { TrashIcon, SparklesIcon } from "@heroicons/react/24/outline";
 import Image from "next/image";
-import axios from "axios";
 export default function TextToImageCard(props: { className?: string }) {
   const { className } = props;
   const [prompt, setPrompt] = useState("");
@@ -23,17 +22,23 @@ export default function TextToImageCard(props: { className?: string }) {
     setGeneratedImage(null);
 
     try {
-      const res = await axios.post(
+      const res = await fetch(
         "https://ai-image-model-back-end.onrender.com/api/text-to-image/generate",
-        { prompt }, // axios-д body-гаа шууд объект болгон дамжуулна
         {
+          method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
+          body: JSON.stringify({ prompt }),
         }
       );
 
-      const data = res.data; // Axios-д response JSON нь res.data-д байдаг
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({}));
+        throw new Error(errorData.message || `Server error: ${res.status}`);
+      }
+
+      const data = await res.json();
 
       if (data.success && data.imageUrl) {
         setGeneratedImage(data.imageUrl);
@@ -41,10 +46,13 @@ export default function TextToImageCard(props: { className?: string }) {
       } else {
         setError("Failed to generate image");
       }
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } catch (err: any) {
+    } catch (err) {
       console.error("Error:", err);
-      setError(err?.message || "Failed to generate image. Please try again.");
+      setError(
+        err instanceof Error
+          ? err.message
+          : "Failed to generate image. Please try again."
+      );
     } finally {
       setLoading(false);
     }
@@ -80,7 +88,7 @@ export default function TextToImageCard(props: { className?: string }) {
         }`}
       >
         <div
-          className="relative md:w-1/2 h-64 md:h-auto border-b md:border-b-0 md:border-r border-white/10 flex items-center justify-center cursor-pointer overflow-hidden rounded-l-3xl bg-gradient-to-br from-purple-900/20 to-pink-900/20"
+          className="relative md:w-1/2 h-56 sm:h-64 md:h-auto border-b md:border-b-0 md:border-r border-white/10 flex items-center justify-center cursor-pointer overflow-hidden rounded-t-3xl md:rounded-t-none md:rounded-l-3xl bg-gradient-to-br from-purple-900/20 to-pink-900/20"
           onClick={() => generatedImage && setIsModalOpen(true)}
         >
           {generatedImage ? (
@@ -192,7 +200,22 @@ export default function TextToImageCard(props: { className?: string }) {
               leaveFrom="opacity-100 scale-100"
               leaveTo="opacity-0 scale-95"
             >
-              <Dialog.Panel className="bg-black/30 backdrop-blur-2xl rounded-2xl max-w-4xl w-full border border-white/20 relative overflow-hidden">
+              <Dialog.Panel className="bg-black/30 backdrop-blur-2xl rounded-2xl max-w-4xl w-full border border-white/20 relative max-h-[85vh] overflow-y-auto">
+                <div className="sticky top-0 z-10 flex justify-end gap-2 p-4 bg-black/10 backdrop-blur-md">
+                  <button
+                    onClick={handleDownload}
+                    className="bg-white/10 hover:bg-white/20 px-4 py-2 rounded-full text-white transition"
+                  >
+                    Download
+                  </button>
+                  <button
+                    onClick={() => setIsModalOpen(false)}
+                    className="bg-white/10 hover:bg-white/20 px-4 py-2 rounded-full text-white transition"
+                  >
+                    Close
+                  </button>
+                </div>
+
                 {generatedImage && (
                   <>
                     <Image
@@ -207,21 +230,6 @@ export default function TextToImageCard(props: { className?: string }) {
                     </div>
                   </>
                 )}
-
-                <div className="absolute top-4 right-4 flex gap-2">
-                  <button
-                    onClick={handleDownload}
-                    className="bg-white/10 hover:bg-white/20 px-4 py-2 rounded-full text-white transition"
-                  >
-                    Download
-                  </button>
-                  <button
-                    onClick={() => setIsModalOpen(false)}
-                    className="bg-white/10 hover:bg-white/20 px-4 py-2 rounded-full text-white transition"
-                  >
-                    Close
-                  </button>
-                </div>
               </Dialog.Panel>
             </Transition.Child>
           </div>
